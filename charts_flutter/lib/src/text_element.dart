@@ -14,6 +14,7 @@
 // limitations under the License.
 
 import 'dart:ui' show TextAlign, TextDirection;
+
 import 'package:charts_common/common.dart' as common
     show
         MaxWidthStrategy,
@@ -22,7 +23,7 @@ import 'package:charts_common/common.dart' as common
         TextMeasurement,
         TextStyle;
 import 'package:flutter/rendering.dart'
-    show Color, TextBaseline, TextPainter, TextSpan, TextStyle;
+    show Color, TextBaseline, TextPainter, TextSpan, TextStyle, FontWeight;
 
 /// Flutter implementation for text measurement and painter.
 class TextElement implements common.TextElement {
@@ -152,6 +153,7 @@ class TextElement implements common.TextElement {
                 color: color,
                 fontSize: textStyle?.fontSize?.toDouble(),
                 fontFamily: textStyle?.fontFamily,
+                fontWeight: _effectiveFontWeight,
                 height: textStyle?.lineHeight)))
       ..textDirection = TextDirection.ltr
       // TODO Flip once textAlign works
@@ -182,5 +184,18 @@ class TextElement implements common.TextElement {
         baseline: baseline);
 
     _painterReady = true;
+  }
+
+  FontWeight? get _effectiveFontWeight {
+    final name = textStyle?.fontWeight?.toLowerCase();
+    if (name == null) return null;
+    final value = int.tryParse(name);
+    if (value == null) {
+      if (name == 'normal') return FontWeight.normal;
+      if (name == 'bold') return FontWeight.bold;
+    } else {
+      return FontWeight.values[value.clamp(100, 900) ~/ 100 - 1];
+    }
+    return null;
   }
 }
